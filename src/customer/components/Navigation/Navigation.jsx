@@ -3,19 +3,16 @@ import { Dialog, Popover, Tab, Transition } from "@headlessui/react";
 import { navigation } from "./NavigationData";
 import {
    Bars3Icon,
-   MagnifyingGlassIcon,
    ShoppingBagIcon,
    XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Avatar, Button, Menu, MenuItem } from "@mui/material";
 import { deepPurple } from "@mui/material/colors";
-import { useLocation, useNavigate } from "react-router-dom";
-import AuthModal from "../../Auth/AuthModal";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getUser, logout } from "../../../State/Auth/Action";
 import { getCart } from "../../../State/Cart/Action";
-import { stringify } from "postcss";
-
+import SearchBar from "../SearchBar/SearchBar";
 function classNames(...classes) {
    return classes.filter(Boolean).join(" ");
 }
@@ -24,14 +21,14 @@ export default function Navigation() {
    const [open, setOpen] = useState(false);
    const navigate = useNavigate();
    const dispatch = useDispatch();
-   const location = useLocation();
+
    const { user, jwt } = useSelector((store) => store.auth);
 
-   const [openAuthModal, setOpenAuthModal] = useState(false);
    const [anchorEl, setAnchorEl] = useState(null);
    const openUserMenu = Boolean(anchorEl);
    const jwtLocal = localStorage.getItem("jwt");
-   const { cartItems } = useSelector((store) => store.cart);
+   const { cart } = useSelector((store) => store.cart);
+   const [isShowing, setIsShowing] = useState(false);
 
    const handleUserClick = (event) => {
       setAnchorEl(event.currentTarget);
@@ -42,14 +39,11 @@ export default function Navigation() {
    };
 
    const handleOpen = () => {
-      setOpenAuthModal(true);
-   };
-   const handleClose = () => {
-      setOpenAuthModal(false);
+      navigate("/login");
    };
    const handleCategoryClick = (category, section, item, close) => {
       navigate(`/${category.id}/${section.id}/${item.id}`);
-      close();
+      setIsShowing(false);
    };
    const handleCartClick = () => {
       navigate("/cart");
@@ -60,23 +54,21 @@ export default function Navigation() {
    };
    useEffect(() => {
       if (jwtLocal) {
+         console.log("dispatch");
          dispatch(getUser(jwtLocal));
       }
    }, [jwtLocal, jwt]);
-   useEffect(() => {
-      if (user) {
-         handleClose();
-      }
-      if (location.pathname === "/login" || location.pathname === "/register") {
-         navigate(-1);
-      }
-   }, [user]);
 
    useEffect(() => {
       if (jwtLocal) {
          dispatch(getCart());
       }
    }, []);
+
+   useEffect(() => {
+      console.log("cart: ", cart);
+   }, [cart]);
+   console.log("user ", user);
    return (
       <div className="bg-white">
          {/* Mobile menu */}
@@ -268,11 +260,7 @@ export default function Navigation() {
             </Dialog>
          </Transition.Root>
 
-         <header className="relative bg-white z-10">
-            <p className="flex h-10 items-center justify-center bg-indigo-600 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
-               Get free delivery on orders over $100
-            </p>
-
+         <header className="fixed top-0 left-0 right-0 h-16 bg-white z-50">
             <nav
                aria-label="Top"
                className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
@@ -291,7 +279,7 @@ export default function Navigation() {
 
                      {/* Logo */}
                      <div className="ml-4 flex lg:ml-0">
-                        <a href="#">
+                        <a href="/">
                            <span className="sr-only">Your Company</span>
                            <img
                               className="h-8 w-auto"
@@ -310,8 +298,16 @@ export default function Navigation() {
                                     <>
                                        <div className="relative flex">
                                           <Popover.Button
+                                             onMouseEnter={() => {
+                                                console.log("enter");
+                                                setIsShowing(category.name);
+                                             }}
+                                             onMouseLeave={() => {
+                                                console.log("leave");
+                                                setIsShowing(false);
+                                             }}
                                              className={classNames(
-                                                open
+                                                isShowing === category.name
                                                    ? "border-indigo-600 text-indigo-600"
                                                    : "border-transparent text-gray-700 hover:text-gray-800",
                                                 "relative z-10 -mb-px flex items-center border-b-2 pt-px text-sm font-medium transition-colors duration-200 ease-out"
@@ -329,6 +325,7 @@ export default function Navigation() {
                                           leave="transition ease-in duration-150"
                                           leaveFrom="opacity-100"
                                           leaveTo="opacity-0"
+                                          show={isShowing === category.name}
                                        >
                                           <Popover.Panel className="absolute inset-x-0 top-full text-sm text-gray-500">
                                              {/* Presentational element used to render the bottom shadow, if we put the shadow on the actual panel it pokes out the top, so we use this shorter element to hide the top of the shadow */}
@@ -337,7 +334,15 @@ export default function Navigation() {
                                                 aria-hidden="true"
                                              />
 
-                                             <div className="relative bg-white">
+                                             <div
+                                                className="relative bg-white"
+                                                onMouseEnter={() =>
+                                                   setIsShowing(category.name)
+                                                }
+                                                onMouseLeave={() =>
+                                                   setIsShowing(false)
+                                                }
+                                             >
                                                 <div className="mx-auto max-w-7xl px-28">
                                                    <div className="grid grid-cols-2 gap-x-8 gap-y-10 py-12">
                                                       <div className="col-start-2 grid grid-cols-2 gap-x-8">
@@ -476,8 +481,8 @@ export default function Navigation() {
                            >
                               Create account
                            </a> */}
-                           {user?.firstName ? (
-                              <div>
+                           {jwtLocal ? (
+                              <div className="p-2">
                                  <Avatar
                                     className="text-white"
                                     onClick={handleUserClick}
@@ -546,18 +551,14 @@ export default function Navigation() {
                         </div> */}
 
                         {/* Search */}
-                        <div className="flex lg:ml-6">
-                           <p className="p-2 text-gray-400 hover:text-gray-500">
-                              <span className="sr-only">Search</span>
-                              <MagnifyingGlassIcon
-                                 className="h-6 w-6"
-                                 aria-hidden="true"
-                              />
-                           </p>
+                        <div className="flex">
+                           <div className="p-2 text-gray-400 hover:text-gray-500">
+                              <SearchBar />
+                           </div>
                         </div>
 
                         {/* Cart */}
-                        <div className="ml-4 flow-root lg:ml-6">
+                        <div className="flow-root">
                            <Button
                               onClick={handleCartClick}
                               className="group -m-2 flex items-center p-2"
@@ -567,7 +568,7 @@ export default function Navigation() {
                                  aria-hidden="true"
                               />
                               <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
-                                 {cartItems?.length ? cartItems.length : "0"}
+                                 {cart?.totalItem ? cart.totalItem : "0"}
                               </span>
                               <span className="sr-only">
                                  items in cart, view bag
@@ -579,8 +580,6 @@ export default function Navigation() {
                </div>
             </nav>
          </header>
-
-         <AuthModal handleClose={handleClose} open={openAuthModal} />
       </div>
    );
 }

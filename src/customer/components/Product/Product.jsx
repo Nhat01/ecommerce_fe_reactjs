@@ -23,10 +23,22 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { findProducts } from "../../../State/Product/Action";
+import HomeSectionCard from "../HomeSectionCard/HomeSectionCard";
+import Skeleton from "react-loading-skeleton";
 
 const sortOptions = [
-   { name: "Price: Low to High", href: "#", current: false },
-   { name: "Price: High to Low", href: "#", current: false },
+   {
+      name: "Price: Low to High",
+      href: "#",
+      current: false,
+      value: "price_low_to_high",
+   },
+   {
+      name: "Price: High to Low",
+      href: "#",
+      current: false,
+      value: "price_high_to_low",
+   },
 ];
 
 function classNames(...classes) {
@@ -40,17 +52,22 @@ export default function Product() {
    const params = useParams();
    const dispatch = useDispatch();
    const { products, loading } = useSelector((store) => store.products);
+   const checkedValues = [];
 
    const decodedQueryString = decodeURIComponent(location.search);
    const searchParams = new URLSearchParams(decodedQueryString);
    const colorValue = searchParams.get("color");
+   colorValue && checkedValues.push(...colorValue.split(","));
    const sizeValue = searchParams.get("size");
+   sizeValue && checkedValues.push(...sizeValue.split(","));
    const priceValue = searchParams.get("price");
+   priceValue && checkedValues.push(...priceValue.split(","));
    const discountValue = searchParams.get("discount");
+   discountValue && checkedValues.push(...discountValue.split(","));
    const sortValue = searchParams.get("sort");
    const stockValue = searchParams.get("stock");
+   stockValue && checkedValues.push(...stockValue.split(","));
    const pageNumber = searchParams.get("page") || 1;
-
    const handleFilter = (value, sectionId) => {
       const searchParams = new URLSearchParams(location.search);
       let filterValue = searchParams.getAll(sectionId);
@@ -65,16 +82,24 @@ export default function Product() {
       } else {
          filterValue.push(value);
       }
+
       if (filterValue.length > 0) {
          searchParams.set(sectionId, filterValue.join(","));
       }
       const query = searchParams.toString();
       navigate({ search: `${query}` });
    };
-
+   console.log(colorValue, sizeValue);
    const handleRadioFilterChange = (e, sectionId) => {
       const searchParams = new URLSearchParams(location.search);
       searchParams.set(sectionId, e.target.value);
+      const query = searchParams.toString();
+      navigate({ search: `${query}` });
+   };
+
+   const handleSortChange = (value) => {
+      const searchParams = new URLSearchParams(location.search);
+      searchParams.set("sort", value);
       const query = searchParams.toString();
       navigate({ search: `${query}` });
    };
@@ -85,21 +110,22 @@ export default function Product() {
       const query = searchParams.toString();
       navigate({ search: `?${query}` });
    };
-
+   console.log(searchParams);
    useEffect(() => {
       const [minPrice, maxPrice] =
          priceValue === null ? [0, 10000] : priceValue.split("-").map(Number);
       const data = {
-         category: params.lavelThree,
+         category: params.levelThree,
          colors: colorValue || [],
          sizes: sizeValue | [],
          minPrice,
          maxPrice,
          minDiscount: discountValue || 0,
          sort: sortValue || "price_low",
-         pageNumber: pageNumber - 1,
+         pageNumber: pageNumber,
          pageSize: 12,
          stock: stockValue,
+         search: "",
       };
       dispatch(findProducts(data));
    }, [
@@ -112,7 +138,8 @@ export default function Product() {
       stockValue,
       pageNumber,
    ]);
-
+   const productList = products.products;
+   const totalPages = products.totalPages;
    return (
       <div className="bg-white">
          <div>
@@ -267,18 +294,20 @@ export default function Product() {
                                  {sortOptions.map((option) => (
                                     <Menu.Item key={option.name}>
                                        {({ active }) => (
-                                          <a
-                                             href={option.href}
+                                          <div
+                                             onClick={() =>
+                                                handleSortChange(option.value)
+                                             }
                                              className={classNames(
                                                 option.current
                                                    ? "font-medium text-gray-900"
                                                    : "text-gray-500",
                                                 active ? "bg-gray-100" : "",
-                                                "block px-4 py-2 text-sm"
+                                                "block px-4 py-2 text-sm cursor-pointer"
                                              )}
                                           >
                                              {option.name}
-                                          </a>
+                                          </div>
                                        )}
                                     </Menu.Item>
                                  ))}
@@ -310,7 +339,7 @@ export default function Product() {
 
                <section
                   aria-labelledby="products-heading"
-                  className="pb-24 pt-6"
+                  className="pb-16 pt-6"
                >
                   <h2 id="products-heading" className="sr-only">
                      Products
@@ -376,9 +405,9 @@ export default function Product() {
                                                             option.value
                                                          }
                                                          type="checkbox"
-                                                         defaultChecked={
-                                                            option.checked
-                                                         }
+                                                         checked={checkedValues.includes(
+                                                            option.value
+                                                         )}
                                                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                                       />
                                                       <label
@@ -451,6 +480,9 @@ export default function Product() {
                                                                value={
                                                                   option.value
                                                                }
+                                                               checked={checkedValues.includes(
+                                                                  option.value
+                                                               )}
                                                                control={
                                                                   <Radio />
                                                                }
@@ -475,10 +507,41 @@ export default function Product() {
                      {/* Product grid */}
                      <div className="lg:col-span-4 w-full">
                         <div className="flex flex-wrap justify-center bg-white py-5">
-                           {loading === false &&
-                              products?.content?.map((item) => (
-                                 <ProductCard product={item} key={item.id} />
-                              ))}
+                           {!loading
+                              ? productList?.map((item) => (
+                                   <HomeSectionCard
+                                      product={item}
+                                      key={item._id}
+                                      className="hover:shadow-box-hover-card"
+                                   />
+                                ))
+                              : [1, 1, 1, 1, 1, 1, 1, 1].map(() => (
+                                   <div
+                                      className={`cursor-pointer flex flex-col items-center bg-white rounded-lg shadow-lg overflow-hidden !w-lg-[15rem] !w-[15rem] mx-3 my-3 border hover:shadow-box-hover`}
+                                   >
+                                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                                         <div className="h-[12rem] w-[8rem]">
+                                            <Skeleton height={180} />
+                                         </div>
+                                      </div>
+                                      <div className="p-4 w-full">
+                                         <h3 className="text-xs font-medium">
+                                            <Skeleton />
+                                         </h3>
+                                         <p className="mt-2 text-sm">
+                                            <Skeleton />
+                                         </p>
+                                         <div className="mt-2">
+                                            <span className=" text-sm">
+                                               <Skeleton />
+                                            </span>
+                                         </div>
+                                         <div className="mt-2">
+                                            <Skeleton />
+                                         </div>
+                                      </div>
+                                   </div>
+                                ))}
                         </div>
                      </div>
                   </div>
@@ -486,11 +549,16 @@ export default function Product() {
 
                <section className="w-full px=[3.6rem]">
                   <div className="px-4 py-5 flex justify-center">
-                     <Pagination
-                        count={products?.totalPages}
-                        color="primary"
-                        onChange={handlePaginationChange}
-                     />
+                     {!loading ? (
+                        <Pagination
+                           count={totalPages || 0}
+                           color="primary"
+                           page={parseInt(pageNumber)}
+                           onChange={handlePaginationChange}
+                        />
+                     ) : (
+                        <Skeleton width={200} />
+                     )}
                   </div>
                </section>
             </main>

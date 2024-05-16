@@ -47,7 +47,7 @@ function HomeSectionCarousel({ data, sectionName }) {
             </Slider>
             {currentSlide < data?.length - settings.slidesToShow && (
                <Button
-                  className="z-50 bg-white"
+                  className="z-40 bg-white"
                   onClick={slideNext}
                   variant="contained"
                   sx={{

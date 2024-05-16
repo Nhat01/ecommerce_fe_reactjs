@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { RadioGroup } from "@headlessui/react";
 import { Box, Button, Grid, LinearProgress, Rating } from "@mui/material";
 import ProductReviewCard from "./ProductReviewCard";
+import { useNavigate } from "react-router-dom";
 import { mens_kurta } from "../../../Data/men_kurta";
 import HomeSectionCard from "../HomeSectionCard/HomeSectionCard";
 import { useParams } from "react-router-dom";
@@ -68,17 +69,24 @@ function classNames(...classes) {
 
 export default function ProductDetails() {
    const { product, products } = useSelector((store) => store.products);
-   const [selectedSize, setSelectedSize] = useState("");
+   const { user } = useSelector((store) => store.auth);
+
+   const [selectedSize, setSelectedSize] = useState(null);
    const params = useParams();
    const dispatch = useDispatch();
+   const navigate = useNavigate();
    const handleAddToCart = () => {
-      const reqData = {
-         productId: params.productId,
-         size: selectedSize.name,
-         quantity: 1,
-      };
-      console.log(reqData);
-      dispatch(addItemToCart(reqData));
+      if (user) {
+         const reqData = {
+            productId: params.productId,
+            size: selectedSize.name,
+            quantity: 1,
+         };
+         console.log(reqData);
+         dispatch(addItemToCart(reqData));
+      } else {
+         navigate("/login");
+      }
    };
 
    useEffect(() => {
@@ -92,7 +100,9 @@ export default function ProductDetails() {
          };
 
          dispatch(findProductCategories(data));
+         setSelectedSize(product.sizes[0]);
       }
+      window.scrollTo({ top: 0, behavior: "smooth" });
    }, [product]);
 
    return (
@@ -213,11 +223,11 @@ export default function ProductDetails() {
                                  aria-required
                               >
                                  <div className="grid grid-cols-4 gap-4 sm:grid-cols-8 lg:grid-cols-4">
-                                    {product?.sizes.map((size) => (
+                                    {product?.sizes.map((size, index) => (
                                        <RadioGroup.Option
                                           key={size.name}
                                           value={size}
-                                          aria-required
+                                          aria-required={true}
                                           disabled={!size.quantity}
                                           className={({ active }) =>
                                              classNames(
@@ -469,7 +479,7 @@ export default function ProductDetails() {
                <Grid container spacing={3}>
                   {products[0]?.products?.map((item) => (
                      <Grid item xs={3}>
-                        <HomeSectionCard product={item} />
+                        <HomeSectionCard product={item} key={item._id} />
                      </Grid>
                   ))}
                </Grid>

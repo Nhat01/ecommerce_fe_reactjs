@@ -1,18 +1,14 @@
 export const homeCarouselData = [
    {
-      image: "https://www.ethnicplus.in/media/mageplaza/bannerslider/banner/image/1/3/13_6.jpg",
+      image: "/banner-thoi-trang-dang-hien-dai-nhat_113856210.jpg",
       path: "/women/clothing/women_dress",
    },
    {
-      image: "https://www.ethnicplus.in/media/mageplaza/bannerslider/banner/image/1/1/11_7.jpg",
+      image: "https://img3.thuthuatphanmem.vn/uploads/2019/10/14/banner-thoi-trang-giam-gia_113856960.jpg",
       path: "/women/clothing/lengha_choli",
    },
    {
-      image: "https://www.ethnicplus.in/media/mageplaza/bannerslider/banner/image/1/0/10_9.jpg",
+      image: "https://gcs.tripi.vn/public-tripi/tripi-feed/img/474102CAg/banner-thoi-trang-the-thao-cho-nam_113858272.jpg",
       path: "/women/clothing/women_saree",
-   },
-   {
-      image: "https://www.ethnicplus.in/media/mageplaza/bannerslider/banner/image/1/2/12_7.jpg",
-      path: "/women/clothing/women_dress",
    },
 ];

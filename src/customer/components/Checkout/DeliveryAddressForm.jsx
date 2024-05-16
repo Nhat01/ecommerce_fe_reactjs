@@ -9,6 +9,7 @@ const DeliveryAddressForm = () => {
    const navigate = useNavigate();
    const dispatch = useDispatch();
    const { user } = useSelector((store) => store.auth);
+   console.log("user", user);
    const handleSubmit = (e) => {
       e.preventDefault();
       const data = new FormData(e.currentTarget);
@@ -26,13 +27,9 @@ const DeliveryAddressForm = () => {
       dispatch(createOrder(orderData));
    };
    const handleClick = (item) => {
-      const address = {
-         ...item,
-         mobile: user?.mobile,
-      };
-      console.log(user);
-      const orderData = { address, navigate };
-      //dispatch(createOrder(orderData));
+      console.log(item);
+      const orderData = { address: item, navigate };
+      dispatch(createOrder(orderData));
    };
    return (
       <div>

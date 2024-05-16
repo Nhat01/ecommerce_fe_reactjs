@@ -16,7 +16,7 @@ export default function Checkout() {
    const location = useLocation();
    const querySearch = new URLSearchParams(location.search);
 
-   const step = querySearch.get("step");
+   const step = parseInt(querySearch.get("step"));
 
    const handleBack = () => {
       setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -54,9 +54,9 @@ export default function Checkout() {
                      </Button>
                   </Box>
                   <div className="mt-10">
-                     {step == 1 ? (
+                     {step === 1 ? (
                         <DeliveryAddressForm />
-                     ) : step == 2 ? (
+                     ) : step === 2 ? (
                         <OrderSummary />
                      ) : null}
                   </div>

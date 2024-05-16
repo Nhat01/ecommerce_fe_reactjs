@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import HomePage from "../customer/pages/HomePage/HomePage";
 import Cart from "../customer/components/Cart/Cart";
 import Navigation from "../customer/components/Navigation/Navigation";
@@ -11,32 +11,50 @@ import Checkout from "../customer/components/Checkout/Checkout";
 import Order from "../customer/components/Order/Order";
 import OrderDetails from "../customer/components/Order/OrderDetails";
 import PaymentSuccess from "../customer/components/Payment/PaymentSuccess";
+import { useSelector } from "react-redux";
+import LoginPage from "../customer/pages/LoginPage/LoginPage";
+import RegisterPage from "../customer/pages/RegisterPage/RegisterPage";
+import ProductSearch from "../customer/components/Product/ProductSearch";
 
 const CustomerRouters = () => {
+   const { user } = useSelector((store) => store.auth);
+   const jwtLocal = localStorage.getItem("jwt");
    return (
       <div>
-         <div>
+         <div className="h-16">
             <Navigation />
          </div>
          <Routes>
-            <Route path="/login" element={<HomePage />} />
-            <Route path="/register" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route path="/" element={<HomePage />} />
-            <Route path="/cart" element={<Cart />} />
             <Route
-               path="/:lavelOne/:lavelTwo/:lavelThree"
+               path="/cart"
+               element={jwtLocal ? <Cart /> : <Navigate to="/login" />}
+            />
+            <Route
+               path="/:levelOne/:levelTwo/:levelThree"
                element={<Product />}
             ></Route>
+            <Route path="/search" element={<ProductSearch />}></Route>
             <Route path="/product/:productId" element={<ProductDetails />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/account/order" element={<Order />}></Route>
+            <Route
+               path="/checkout"
+               element={jwtLocal ? <Checkout /> : <Navigate to="/login" />}
+            />
+            <Route
+               path="/account/order"
+               element={jwtLocal ? <Order /> : <Navigate to="/login" />}
+            ></Route>
             <Route
                path="/account/order/:orderId"
-               element={<OrderDetails />}
+               element={jwtLocal ? <OrderDetails /> : <Navigate to="/login" />}
             ></Route>
             <Route
                path="/payment/:orderId"
-               element={<PaymentSuccess />}
+               element={
+                  jwtLocal ? <PaymentSuccess /> : <Navigate to="/login" />
+               }
             ></Route>
          </Routes>
          <div>

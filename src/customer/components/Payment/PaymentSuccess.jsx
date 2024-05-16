@@ -33,7 +33,7 @@ const PaymentSuccess = () => {
       }
    }, [orderId, paymentId]);
 
-   console.log("order: ", order);
+   console.log("order: ", order?.orderItems);
 
    return (
       <div className="px-2 lg:px-36 spac">

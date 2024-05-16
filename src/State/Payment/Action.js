@@ -10,8 +10,24 @@ export const createPayment = (orderId) => async (dispatch) => {
    dispatch({ type: CREATE_PAYMENT_REQUEST });
    try {
       const { data } = await api.post(`/api/payments/${orderId}`);
-      if (data.payment_link_url) {
-         window.location.href = data.payment_link_url;
+      console.log(data);
+      if (data.link_payment) {
+         window.location.href = data.link_payment;
+      }
+   } catch (error) {
+      dispatch({ type: CREATE_PAYMENT_FAILURE, payload: error.message });
+   }
+};
+
+export const createPaymentVnPay = (orderId) => async (dispatch) => {
+   dispatch({ type: CREATE_PAYMENT_REQUEST });
+   try {
+      const { data } = await api.post(
+         `/api/payments/create_payment_url/${orderId}`
+      );
+      console.log(data);
+      if (data.link_payment) {
+         window.location.href = data.link_payment;
       }
    } catch (error) {
       dispatch({ type: CREATE_PAYMENT_FAILURE, payload: error.message });

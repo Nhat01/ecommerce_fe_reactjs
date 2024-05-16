@@ -59,10 +59,11 @@ export const register = (userData) => async (dispatch) => {
          userData
       );
       const user = response.data;
-      if (user.jwt) {
-         localStorage.setItem("jwt", user.jwt);
+      if (user.token) {
+         localStorage.setItem("jwt", user.token);
       }
-      dispatch(registerSuccess(user.jwt));
+      console.log(user);
+      dispatch(registerSuccess(user.token));
    } catch (error) {
       dispatch(registerFailure(error.message));
    }
@@ -76,10 +77,10 @@ export const login = (userData) => async (dispatch) => {
          userData
       );
       const user = response.data;
-      if (user.jwt) {
-         localStorage.setItem("jwt", user.jwt);
+      if (user.token) {
+         localStorage.setItem("jwt", user.token);
       }
-      dispatch(loginSuccess(user.jwt));
+      dispatch(loginSuccess(user.token));
    } catch (error) {
       dispatch(loginFailure(error.message));
    }

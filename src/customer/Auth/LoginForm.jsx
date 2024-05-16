@@ -32,6 +32,8 @@ const LoginForm = () => {
                      label="Email"
                      fullWidth
                      autoComplete="email"
+                     inputMode="email" // Chỉ định kiểu nhập là email
+                     pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" // Pattern kiểm tra định dạng email
                   />
                </Grid>
                <Grid item xs={12}>
